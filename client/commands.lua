@@ -10,7 +10,7 @@ RegisterCommand('setvoiceintent', function(source, args)
 		end
 		LocalPlayer.state:set('voiceIntent', intent, true)
 	end
-end)
+end, false)
 TriggerEvent('chat:addSuggestion', '/setvoiceintent', 'Sets the players voice intent', {
 	{
 		name = "intent",
@@ -22,7 +22,7 @@ TriggerEvent('chat:addSuggestion', '/setvoiceintent', 'Sets the players voice in
 RegisterCommand('vol', function(_, args)
 	if not args[1] then return end
 	setVolume(tonumber(args[1]))
-end)
+end, false)
 TriggerEvent('chat:addSuggestion', '/vol', 'Sets the radio/phone volume', {
 	{ name = "volume", help = "A range between 1-100 on how loud you want them to be" },
 })

@@ -1,5 +1,4 @@
 local radioChannel = 0
-local radioNames = {}
 local disableRadioAnim = false
 local isAllowedToTalk = nil
 
@@ -11,8 +10,7 @@ end
 --- event syncRadioData
 --- syncs the current players on the radio to the client
 ---@param radioTable table the table of the current players on the radio
----@param localPlyRadioName string the local players name
-function syncRadioData(radioTable, localPlyRadioName)
+function syncRadioData(radioTable)
 	radioData = radioTable
 	logger.info('[radio] Syncing radio table.')
 	if GetConvarInt('voice_debugMode', 0) >= 4 then
@@ -31,30 +29,27 @@ function syncRadioData(radioTable, localPlyRadioName)
 		radioChannel = radioChannel,
 		radioEnabled = isEnabled
 	})
-	if GetConvarInt("voice_syncPlayerNames", 0) == 1 then
-		radioNames[playerServerId] = localPlyRadioName
-	end
 end
 
 if Cfg.DisableTalkOver == true or GetConvarInt('voice_disableTalkOver', 0) == 1 then
-    RegisterNetEvent("pma-voice:isAllowedToTalk", function(val)
-        if isAllowedToTalk then
-            isAllowedToTalk:resolve(val)
-        end
-    end)
+	RegisterNetEvent("pma-voice:isAllowedToTalk", function(val)
+		if isAllowedToTalk then
+			isAllowedToTalk:resolve(val)
+		end
+	end)
 end
 
 function checkAllowedToTalk()
-    if Cfg.DisableTalkOver == true or GetConvarInt('voice_disableTalkOver', 0) == 1 then
-        isAllowedToTalk = promise.new()
+	if Cfg.DisableTalkOver == true or GetConvarInt('voice_disableTalkOver', 0) == 1 then
+		isAllowedToTalk = promise.new()
 
-        TriggerServerEvent("pma-voice:isAllowedToTalk")
-        Citizen.Await(isAllowedToTalk)
+		TriggerServerEvent("pma-voice:isAllowedToTalk")
+		Citizen.Await(isAllowedToTalk)
 
-        return isAllowedToTalk.value
-    else
-        return true
-    end
+		return isAllowedToTalk.value
+	else
+		return true
+	end
 end
 
 RegisterNetEvent('pma-voice:syncRadioData', syncRadioData)
@@ -66,12 +61,17 @@ RegisterNetEvent('pma-voice:syncRadioData', syncRadioData)
 function setTalkingOnRadio(plySource, enabled)
 	radioData[plySource] = enabled
 
-	if not isRadioEnabled() then return logger.info("[radio] Ignoring setTalkingOnRadio. radioEnabled: %s disableRadio: %s", radioEnabled, LocalPlayer.state.disableRadio) end
+	if not isRadioEnabled() then
+		return logger.info(
+			"[radio] Ignoring setTalkingOnRadio. radioEnabled: %s disableRadio: %s", radioEnabled,
+			LocalPlayer.state.disableRadio)
+	end
 	-- If we're on a call we don't want to toggle their voice disabled this will break calls.
 	local enabled = enabled or callData[plySource]
 	toggleVoice(plySource, enabled, 'radio')
 	playMicClicks(enabled)
 end
+
 RegisterNetEvent('pma-voice:setTalkingOnRadio', setTalkingOnRadio)
 
 --- event addPlayerToRadio
@@ -79,15 +79,14 @@ RegisterNetEvent('pma-voice:setTalkingOnRadio', setTalkingOnRadio)
 ---@param plySource number the players server id to add to the radio.
 function addPlayerToRadio(plySource, plyRadioName)
 	radioData[plySource] = false
-	if GetConvarInt("voice_syncPlayerNames", 0) == 1 then
-		radioNames[plySource] = plyRadioName
-	end
+
 	logger.info('[radio] %s joined radio %s %s', plySource, radioChannel,
 		radioPressed and " while we were talking, adding them to targets" or "")
 	if radioPressed then
 		addVoiceTargets(radioData, callData)
 	end
 end
+
 RegisterNetEvent('pma-voice:addPlayerToRadio', addPlayerToRadio)
 
 --- event removePlayerFromRadio
@@ -105,7 +104,6 @@ function removePlayerFromRadio(plySource)
 			radioChannel = 0,
 			radioEnabled = radioEnabled
 		})
-		radioNames = {}
 		radioData = {}
 		addVoiceTargets(callData)
 	else
@@ -117,9 +115,6 @@ function removePlayerFromRadio(plySource)
 			logger.info('[radio] %s has left radio %s', plySource, radioChannel)
 		end
 		radioData[plySource] = nil
-		if GetConvarInt("voice_syncPlayerNames", 0) == 1 then
-			radioNames[plySource] = nil
-		end
 	end
 end
 
@@ -208,9 +203,13 @@ RegisterCommand('+radiotalk', function()
 	if GetConvarInt('voice_enableRadios', 1) ~= 1 then return end
 	if isDead() then return end
 	if not isRadioEnabled() then return end
-	if not checkAllowedToTalk() then return end
 	if not radioPressed then
 		if radioChannel > 0 then
+			if not checkAllowedToTalk() then
+				Notify("You cant talk while someone else is talking...")
+				return
+			end
+
 			logger.info('[radio] Start broadcasting, update targets and notify server.')
 			addVoiceTargets(radioData, callData)
 			TriggerServerEvent('pma-voice:setTalkingOnRadio', true)
@@ -231,9 +230,10 @@ RegisterCommand('+radiotalk', function()
 					end
 					if shouldPlayAnimation and HasAnimDictLoaded("random@arrests") then
 						if not IsEntityPlayingAnim(PlayerPedId(), "random@arrests", "generic_radio_enter", 3) then
-							TaskPlayAnim(PlayerPedId(), "random@arrests", "generic_radio_enter", 8.0, 2.0, -1, 50, 2.0, false,
+							TaskPlayAnim(PlayerPedId(), "random@arrests", "generic_radio_enter", 8.0, 2.0, -1, 50, 2.0,
 								false,
-							false)
+								false,
+								false)
 						end
 					end
 					SetControlNormal(0, 249, 1.0)
@@ -283,6 +283,7 @@ function syncRadio(_radioChannel)
 	logger.info('[radio] radio set serverside update to radio %s', radioChannel)
 	radioChannel = _radioChannel
 end
+
 RegisterNetEvent('pma-voice:clSetPlayerRadio', syncRadio)
 
 
@@ -313,4 +314,3 @@ local function removeRadioDisableBit(bit)
 	LocalPlayer.state:set("disableRadio", curVal, true)
 end
 exports("removeRadioDisableBit", removeRadioDisableBit)
-
