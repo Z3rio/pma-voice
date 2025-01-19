@@ -291,7 +291,7 @@ RegisterNetEvent('pma-voice:clSetPlayerRadio', syncRadio)
 ---@param wasRadioEnabled boolean whether radio is enabled or not
 function handleRadioEnabledChanged(wasRadioEnabled)
 	if wasRadioEnabled then
-		syncRadioData(radioData, "")
+		syncRadioData(radioData)
 	else
 		removePlayerFromRadio(playerServerId)
 	end
