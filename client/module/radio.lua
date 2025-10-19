@@ -1,4 +1,5 @@
 local radioChannel = 0
+local radioNames = {}
 local disableRadioAnim = false
 local isAllowedToTalk = nil
 local radioAnim = {
@@ -14,7 +15,8 @@ end
 --- event syncRadioData
 --- syncs the current players on the radio to the client
 ---@param radioTable table the table of the current players on the radio
-function syncRadioData(radioTable)
+---@---@param localPlyRadioName string the local players name
+function syncRadioData(radioTable, localPlyRadioName)
 	radioData = radioTable
 	logger.info('[radio] Syncing radio table.')
 	if GetConvarInt('voice_debugMode', 0) >= 4 then
@@ -33,6 +35,9 @@ function syncRadioData(radioTable)
 		radioChannel = radioChannel,
 		radioEnabled = isEnabled
 	})
+	if GetConvarInt("voice_syncPlayerNames", 0) == 1 then
+		radioNames[playerServerId] = localPlyRadioName
+	end
 end
 
 if Cfg.DisableTalkOver == true or GetConvarInt('voice_disableTalkOver', 0) == 1 then
@@ -65,11 +70,7 @@ RegisterNetEvent('pma-voice:syncRadioData', syncRadioData)
 function setTalkingOnRadio(plySource, enabled)
 	radioData[plySource] = enabled
 
-	if not isRadioEnabled() then
-		return logger.info(
-			"[radio] Ignoring setTalkingOnRadio. radioEnabled: %s disableRadio: %s", radioEnabled,
-			LocalPlayer.state.disableRadio)
-	end
+	if not isRadioEnabled() then return logger.info("[radio] Ignoring setTalkingOnRadio. radioEnabled: %s disableRadio: %s", radioEnabled, LocalPlayer.state.disableRadio) end
 	-- If we're on a call we don't want to toggle their voice disabled this will break calls.
 	local enabled = enabled or callData[plySource]
 	toggleVoice(plySource, enabled, 'radio')
@@ -83,7 +84,9 @@ RegisterNetEvent('pma-voice:setTalkingOnRadio', setTalkingOnRadio)
 ---@param plySource number the players server id to add to the radio.
 function addPlayerToRadio(plySource, plyRadioName)
 	radioData[plySource] = false
-
+	if GetConvarInt("voice_syncPlayerNames", 0) == 1 then
+		radioNames[plySource] = plyRadioName
+	end
 	logger.info('[radio] %s joined radio %s %s', plySource, radioChannel,
 		radioPressed and " while we were talking, adding them to targets" or "")
 	if radioPressed then
@@ -119,6 +122,9 @@ function removePlayerFromRadio(plySource)
 			logger.info('[radio] %s has left radio %s', plySource, radioChannel)
 		end
 		radioData[plySource] = nil
+		if GetConvarInt("voice_syncPlayerNames", 0) == 1 then
+			radioNames[plySource] = nil
+		end
 	end
 end
 
@@ -241,7 +247,7 @@ RegisterCommand('+radiotalk', function()
 							TaskPlayAnim(PlayerPedId(), dict, anim, 8.0, 2.0, -1, 50, 2.0, false,
 								false,
 								false,
-								false)
+							false)
 						end
 					end
 					SetControlNormal(0, 249, 1.0)
@@ -310,7 +316,7 @@ RegisterNetEvent('pma-voice:clSetPlayerRadio', syncRadio)
 ---@param wasRadioEnabled boolean whether radio is enabled or not
 function handleRadioEnabledChanged(wasRadioEnabled)
 	if wasRadioEnabled then
-		syncRadioData(radioData)
+		syncRadioData(radioData, "")
 	else
 		removePlayerFromRadio(playerServerId)
 	end
