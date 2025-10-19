@@ -13,9 +13,7 @@ If you were previously using the state bag getter `Player(source).state.phone` y
 
 Please report any issues you have in the GitHub [Issues](https://github.com/AvarianKnight/pma-voice/issues)
 
-### NOTE: It is expected for servers to be on the latest recommended version, which you can find [here for Windows](https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/) and [here for Linux](https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/)
-
-## Compatibility Notice
+# Compatibility Notice:
 
 This script is not compatible with other voice systems (duh), that means if you have vMenus voice chat you will **have** to [disable](https://docs.vespura.com/vmenu/faq/#q-how-do-i-disable-voice-chat) it.
 
@@ -33,8 +31,6 @@ Please do not override `NetworkSetTalkerProximity`, `MumbleSetTalkerProximity`, 
 You only need to add the convar **if** you're changing the value.
 
 All of the configs here are set using `setr [voice_configOption] [boolean]`
-
-Native audio will not work on RedM, you will have to use 3d audio.
 
 | ConVar                     | Default | Description                                                   | Parameter(s) |
 |----------------------------|---------|---------------------------------------------------------------|--------------|
