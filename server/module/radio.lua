@@ -194,3 +194,10 @@ AddEventHandler("onResourceStop", function(resource)
 		end
 	end
 end)
+
+CreateThread(function()
+	while true do
+		logger.verbose(json.encode(radioData))
+		Wait(500)
+	end
+end)
