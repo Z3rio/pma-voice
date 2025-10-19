@@ -15,7 +15,7 @@ end
 --- event syncRadioData
 --- syncs the current players on the radio to the client
 ---@param radioTable table the table of the current players on the radio
----@---@param localPlyRadioName string the local players name
+---@param localPlyRadioName string the local players name
 function syncRadioData(radioTable, localPlyRadioName)
 	radioData = radioTable
 	logger.info('[radio] Syncing radio table.')
@@ -76,7 +76,6 @@ function setTalkingOnRadio(plySource, enabled)
 	toggleVoice(plySource, enabled, 'radio')
 	playMicClicks(enabled)
 end
-
 RegisterNetEvent('pma-voice:setTalkingOnRadio', setTalkingOnRadio)
 
 --- event addPlayerToRadio
@@ -111,6 +110,7 @@ function removePlayerFromRadio(plySource)
 			radioChannel = 0,
 			radioEnabled = radioEnabled
 		})
+		radioNames = {}
 		radioData = {}
 		addVoiceTargets(callData)
 	else
@@ -308,7 +308,6 @@ function syncRadio(_radioChannel)
 	logger.info('[radio] radio set serverside update to radio %s', radioChannel)
 	radioChannel = _radioChannel
 end
-
 RegisterNetEvent('pma-voice:clSetPlayerRadio', syncRadio)
 
 
