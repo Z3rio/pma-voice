@@ -92,7 +92,6 @@ function addPlayerToRadio(plySource, plyRadioName)
 		addVoiceTargets(radioData, callData)
 	end
 end
-
 RegisterNetEvent('pma-voice:addPlayerToRadio', addPlayerToRadio)
 
 --- event removePlayerFromRadio

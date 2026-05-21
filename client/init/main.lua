@@ -142,7 +142,12 @@ function toggleVoice(plySource, enabled, moduleType)
 		if GetConvarInt('voice_enableSubmix', 1) == 1 then
 			if moduleType then
 				disableSubmixReset[plySource] = true
-				if submixIndicies[moduleType] then
+				-- Allow external resources to take full ownership of radio submix
+				-- assignment by setting voice_disableRadioSubmix 1.  Volume and
+				-- debounce-reset behaviour are unaffected.
+				local externalRadioSubmix = moduleType == 'radio'
+					and GetConvarInt('voice_disableRadioSubmix', 0) == 1
+				if submixIndicies[moduleType] and not externalRadioSubmix then
 					MumbleSetSubmixForServerId(plySource, submixIndicies[moduleType])
 				end
 			else
