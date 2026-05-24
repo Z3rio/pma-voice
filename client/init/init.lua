@@ -27,6 +27,9 @@ AddEventHandler('onClientResourceStart', function(resource)
 	end
 	sendUIMessage({
 		uiEnabled = GetConvarInt("voice_enableUi", 1) == 1,
+		callUiEnabled = GetConvarInt("voice_enableCallUi", 1) == 1,
+		radioUiEnabled = GetConvarInt("voice_enableRadioUi", 1) == 1,
+		mainUiEnabled = GetConvarInt("voice_enableMainUi", 1) == 1,
 		voiceModes = json.encode(Cfg.voiceModes),
 		voiceMode = mode - 1
 	})

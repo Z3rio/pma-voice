@@ -158,7 +158,7 @@ CreateThread(function()
 			Wait(100)
 		end
 		-- Leave the check here as we don't want to do any of this logic
-		if GetConvarInt('voice_enableUi', 1) == 1 then
+		if GetConvarInt('voice_enableUi', 1) == 1 and GetConvarInt('voice_enableRadioUi', 1) == 1 then
 			local curTalkingStatus = MumbleIsPlayerTalking(PlayerId()) == 1
 			if lastRadioStatus ~= radioPressed or lastTalkingStatus ~= curTalkingStatus then
 				lastRadioStatus = radioPressed
