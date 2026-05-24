@@ -70,6 +70,8 @@ All of the configs here are set using `setr [voice_configOption] [int]` OR `setr
 | voice_enableRadios           |    1    | Enables the radio sub-modules                                 | int          |
 | voice_enableCalls           |    1    | Enables the call sub-modules                                 | int          |
 | voice_enableSubmix      |    1    | Enables the submix which adds a radio/call style submix to their voice **NOTE: Submixs require native audio** | int          |
+| voice_disableRadioSubmix      |    0    | Disables only the radio submix, 1 = true = disabled. `voice_enableSubmix` has priority over this. | int          |
+| voice_disableCallSubmix      |    0    | Disables only the call submix, 1 = true = disabled. `voice_enableSubmix` has priority over this. | int          |
 | voice_enableRadioAnim        |   1     | Enables (grab shoulder mic) animation while talking on the radio.          | int          |
 | voice_defaultRadio           |   LMENU  | The default key to use the radio. You can find a list of valid keys [in the FiveM docs](https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/keyboard/)                             | string       |
 
