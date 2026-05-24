@@ -148,11 +148,19 @@ local disableSubmixReset = {}
 function toggleVoice(plySource, enabled, moduleType)
 	if mutedPlayers[plySource] then return end
 	logger.verbose('[main] Updating %s to talking: %s with submix %s', plySource, enabled, moduleType)
+	local submixEnabled =
+		-- If this is explicitly disabled, then it shouldnt matter if voice_disableRadioSubmix or voice_disableCallSubmix is enabled
+		GetConvarInt('voice_enableSubmix', 1) == 1 and
+		-- Allow external resources to take full ownership of radio submix or call submix
+		(
+			(moduleType == 'radio' and GetConvarInt('voice_disableRadioSubmix', 0) == 1)
+			or (moduleType == 'call' and GetConvarInt('voice_disableCallSubmix', 0) == 1)
+		)
+
 	local distance = currentTargets[plySource]
 	if enabled and (not distance or distance > 4.0) then
-		print(volumes[moduleType])
 		MumbleSetVolumeOverrideByServerId(plySource, enabled and volumes[moduleType])
-		if GetConvarInt('voice_enableSubmix', 1) == 1 then
+		if submixEnabled then
 			if moduleType then
 				disableSubmixReset[plySource] = true
 				if submixIndicies[moduleType] then
@@ -163,7 +171,7 @@ function toggleVoice(plySource, enabled, moduleType)
 			end
 		end
 	elseif not enabled then
-		if GetConvarInt('voice_enableSubmix', 1) == 1 then
+		if submixEnabled then
 			-- garbage collect it
 			disableSubmixReset[plySource] = nil
 			SetTimeout(250, function()
@@ -312,9 +320,9 @@ if gameVersion == 'redm' then
 	local KEY_LEFT_ALT = 0xA4
 
 	RegisterRawKeymap("pma-voice_radioTalk", function()
-			ExecuteCommand('+radiotalk')
+		ExecuteCommand('+radiotalk')
 	end, function()
-			ExecuteCommand('-radiotalk')
+		ExecuteCommand('-radiotalk')
 	end, KEY_LEFT_ALT, true)
 end
 
