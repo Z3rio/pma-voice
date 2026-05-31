@@ -10,6 +10,5 @@ Removes a channel check for radio channel.
 
 ```lua
 -- Example for Removes
--- this always has to return true/false
 exports['pma-voice']:removeChannelCheck(1)
 ```
