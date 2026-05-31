@@ -25,9 +25,24 @@ function addChannelCheck(channel, cb)
 	end
 	radioChecks[channel] = cb
 	logger.info("%s added a check to channel %s", GetInvokingResource(), channel)
+	return true
 end
 
 exports('addChannelCheck', addChannelCheck)
+
+--- removes any check for the channel, function is expected to return a boolean of true or false
+---@param channel number the channel to add a check to
+function removeChannelCheck(channel)
+	local channelType = type(channel)
+	if channelType ~= "number" then
+		error(("'channel' expected 'number' got '%s'"):format(channelType))
+	end
+	radioChecks[channel] = nil
+	logger.info("%s removed check for channel %s", GetInvokingResource(), channel)
+	return true
+end
+
+exports("removeChannelCheck", removeChannelCheck)
 
 local function radioNameGetter_orig(source)
 	return GetPlayerName(source)
