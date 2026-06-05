@@ -13,6 +13,12 @@ radioEnabled, radioPressed, mode = true, false, GetConvarInt('voice_defaultVoice
 radioData = {}
 callData = {}
 submixIndicies = {}
+
+--- Returns true if radio is enabled and no disable bits are set.
+--- Defined here because client/module/radio.lua is removed; phone.lua still calls this.
+function isRadioEnabled()
+	return radioEnabled and (LocalPlayer.state.disableRadio or 0) == 0
+end
 --- function setVolume
 --- Toggles the players volume
 ---@param volume number between 0 and 100
